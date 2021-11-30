@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.sensors.NavX;
 import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
@@ -15,10 +16,8 @@ public class Drivetrain {
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
   public static final double kInchesToMeters = 0.0254;
-  public static final double kRobotWidth = 24; //inches, y-coordinate
-  public static final double kRobotLength = 26.5; //inches, x-coordinate
+  public static final double kRobotLength = 23.5; //inches, distance from center, robot is a square so length and width are the same
 
-  //FIXME Wheel coordinates from center (Robot dependent)
   private final Translation2d m_frontLeftLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, kRobotLength / 2 * kInchesToMeters);
   private final Translation2d m_frontRightLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, -kRobotLength / 2 * kInchesToMeters);
   private final Translation2d m_backLeftLocation = new Translation2d(-kRobotLength / 2 * kInchesToMeters, kRobotLength / 2 * kInchesToMeters);
@@ -29,8 +28,7 @@ public class Drivetrain {
   private final SwerveModule m_backLeft = new SwerveModule(5, 6);
   private final SwerveModule m_backRight = new SwerveModule(7, 8);
 
-  //FIXME Convert gyro to NavX
-  private final AnalogGyro m_gyro = new AnalogGyro(0);
+  private final NavX m_gyro = NavX.getInstance();
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(

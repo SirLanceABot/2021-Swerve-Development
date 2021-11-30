@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.Encoder;
+import com.ctre.phoenix.sensors.CANCoder;
 import edu.wpi.first.wpilibj.PWMSparkMax;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.controller.PIDController;
@@ -17,21 +18,26 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 
 public class SwerveModule {
-  //FIXME Change Wheel Radius and EncoderResolution
-  private static final double kWheelRadius = 0.0508;
-  private static final int kEncoderResolution = 4096;
+  private static final double kWheelRadiusInches = 2;
+  private static final double kInchesToMeters = 0.0254;
+  private static final double kWheelRadiusMeters = kWheelRadiusInches * kInchesToMeters;
+  private static final int kDriveMotorEncoderResolution = 2048;
+  private static final int kTurningMotorEncoderResolution = 4096;
+  private static final double kDriveMotorGearRatio = 8.14;
+  private static final double kTurningMotorGearRatio = 12.8;
 
   private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
 
-  //FIXME Convert to Talon FX
   private final WPI_TalonFX m_driveMotor;
   private final WPI_TalonFX m_turningMotor;
 
-  //FIXME Convert to Talon FX
   private final Encoder m_driveEncoder = new Encoder(0, 1);
+
   private final Encoder m_turningEncoder = new Encoder(2, 3);
+  //FIXME: change to cancoder
+  // private final CANCoder m_turningEncoder = new CANCoder(0);
 
   private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
 
@@ -43,7 +49,10 @@ public class SwerveModule {
           new TrapezoidProfile.Constraints(
               kModuleMaxAngularVelocity, kModuleMaxAngularAcceleration));
 
-  // Gains are for example purposes only - must be determined for your own robot!
+  //FIXME: Gains are for example purposes only - must be determined for your own robot!
+  //First parameter is static gain (how much voltage it takes to move)
+  //Second parameters is veloctiy gain (how much additional speed you get per volt)
+  
   private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
   private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5);
 
@@ -57,16 +66,15 @@ public class SwerveModule {
     m_driveMotor = new WPI_TalonFX(driveMotorChannel);
     m_turningMotor = new WPI_TalonFX(turningMotorChannel);
 
-    //FIXME Convert Encoders to Talon FX
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
-    m_driveEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    m_driveEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadiusMeters / kDriveMotorEncoderResolution / kDriveMotorGearRatio);
 
     // Set the distance (in this case, angle) per pulse for the turning encoder.
     // This is the the angle through an entire rotation (2 * wpi::math::pi)
     // divided by the encoder resolution.
-    m_turningEncoder.setDistancePerPulse(2 * Math.PI / kEncoderResolution);
+    m_turningEncoder.setDistancePerPulse(kTurningMotorEncoderResolution / kTurningMotorGearRatio);
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
