@@ -4,8 +4,13 @@
 
 package frc.robot;
 
+<<<<<<< HEAD
 import frc.sensors.NavX;
 import edu.wpi.first.wpilibj.AnalogGyro;
+=======
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.SerialPort;
+>>>>>>> Darren - SwerveBot almost working besides velocity
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
@@ -16,29 +21,39 @@ public class Drivetrain {
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
   public static final double kInchesToMeters = 0.0254;
+<<<<<<< HEAD
   public static final double kRobotLength = 23.5; //inches, distance from center, robot is a square so length and width are the same
+=======
+  public static final double kRobotWidth = 23.5; //inches, y-coordinate
+  public static final double kRobotLength = 23.5; //inches, x-coordinate
+>>>>>>> Darren - SwerveBot almost working besides velocity
 
   private final Translation2d m_frontLeftLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, kRobotLength / 2 * kInchesToMeters);
   private final Translation2d m_frontRightLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, -kRobotLength / 2 * kInchesToMeters);
   private final Translation2d m_backLeftLocation = new Translation2d(-kRobotLength / 2 * kInchesToMeters, kRobotLength / 2 * kInchesToMeters);
   private final Translation2d m_backRightLocation = new Translation2d(-kRobotLength / 2 * kInchesToMeters, -kRobotLength / 2 * kInchesToMeters);
 
-  private final SwerveModule m_frontLeft = new SwerveModule(1, 2);
-  private final SwerveModule m_frontRight = new SwerveModule(3, 4);
-  private final SwerveModule m_backLeft = new SwerveModule(5, 6);
-  private final SwerveModule m_backRight = new SwerveModule(7, 8);
+  private final SwerveModule m_frontLeft = new SwerveModule(Constants.SwerveModuleConstants.frontLeft);
+  private final SwerveModule m_frontRight = new SwerveModule(Constants.SwerveModuleConstants.frontRight);
+  private final SwerveModule m_backLeft = new SwerveModule(Constants.SwerveModuleConstants.backLeft);
+  private final SwerveModule m_backRight = new SwerveModule(Constants.SwerveModuleConstants.backRight);
 
+<<<<<<< HEAD
   private final NavX m_gyro = NavX.getInstance();
+=======
+  //FIXME Convert gyro to NavX
+  private final AHRS m_navx = new AHRS(SerialPort.Port.kUSB);
+>>>>>>> Darren - SwerveBot almost working besides velocity
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
           m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
 
   private final SwerveDriveOdometry m_odometry =
-      new SwerveDriveOdometry(m_kinematics, m_gyro.getRotation2d());
+      new SwerveDriveOdometry(m_kinematics, m_navx.getRotation2d());
 
   public Drivetrain() {
-    m_gyro.reset();
+    m_navx.reset();
   }
 
   /**
@@ -54,7 +69,7 @@ public class Drivetrain {
     var swerveModuleStates =
         m_kinematics.toSwerveModuleStates(
             fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_gyro.getRotation2d())
+                ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_navx.getRotation2d())
                 : new ChassisSpeeds(xSpeed, ySpeed, rot));
     SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, kMaxSpeed);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
@@ -66,7 +81,7 @@ public class Drivetrain {
   /** Updates the field relative position of the robot. */
   public void updateOdometry() {
     m_odometry.update(
-        m_gyro.getRotation2d(),
+        m_navx.getRotation2d(),
         m_frontLeft.getState(),
         m_frontRight.getState(),
         m_backLeft.getState(),
