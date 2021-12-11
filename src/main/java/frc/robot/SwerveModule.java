@@ -30,6 +30,14 @@ public class SwerveModule {
   public static final double kInchesToMeters = 0.0254;
   private static final double kWheelRadius = 2 * kInchesToMeters;
   private static final int kEncoderResolution = 2048;
+  // FIXME Use these variables probably after we removed in a merge conflict
+  // private static final double kWheelRadiusInches = 2;
+  // private static final double kInchesToMeters = 0.0254;
+  // private static final double kWheelRadiusMeters = kWheelRadiusInches * kInchesToMeters;
+  // private static final int kDriveMotorEncoderResolution = 2048;
+  // private static final int kTurningMotorEncoderResolution = 4096;
+  // private static final double kDriveMotorGearRatio = 8.14;
+  // private static final double kTurningMotorGearRatio = 12.8;
 
   private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
   private static final double kModuleMaxAngularAcceleration =
