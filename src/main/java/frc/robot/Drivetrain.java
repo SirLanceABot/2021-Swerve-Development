@@ -20,10 +20,10 @@ public class Drivetrain {
 //   public static final double kRobotWidth = 23.5; //inches, y-coordinate
 //   public static final double kRobotLength = 23.5; //inches, x-coordinate
 
-  private final Translation2d m_frontLeftLocation = new Translation2d(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
-  private final Translation2d m_frontRightLocation = new Translation2d(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, -Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
-  private final Translation2d m_backLeftLocation = new Translation2d(-Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
-  private final Translation2d m_backRightLocation = new Translation2d(-Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, -Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
+  private final Translation2d m_frontLeftLocation = new Translation2d(Constants.DRIVETRAIN_WHEELBASE_METERS / 2, Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2);
+  private final Translation2d m_frontRightLocation = new Translation2d(Constants.DRIVETRAIN_WHEELBASE_METERS / 2, -Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2);
+  private final Translation2d m_backLeftLocation = new Translation2d(-Constants.DRIVETRAIN_WHEELBASE_METERS / 2, Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2);
+  private final Translation2d m_backRightLocation = new Translation2d(-Constants.DRIVETRAIN_WHEELBASE_METERS / 2, -Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2);
 
   private final SwerveModule m_frontLeft = new SwerveModule(Constants.SwerveModuleConstants.frontLeft);
   private final SwerveModule m_frontRight = new SwerveModule(Constants.SwerveModuleConstants.frontRight);
@@ -43,6 +43,11 @@ public class Drivetrain {
   public Drivetrain()
   {
     m_navx.reset();
+    
+    System.out.println(m_frontLeft.getTurningEncoderPosition());
+    System.out.println(m_frontRight.getTurningEncoderPosition());
+    System.out.println(m_backLeft.getTurningEncoderPosition());
+    System.out.println(m_backRight.getTurningEncoderPosition());
   }
 
   /**
@@ -54,13 +59,14 @@ public class Drivetrain {
    * @param fieldRelative Whether the provided x and y speeds are relative to the field.
    */
   @SuppressWarnings("ParameterName")
-  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative) {
+  public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative)
+  {
     var swerveModuleStates =
         m_kinematics.toSwerveModuleStates(
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_navx.getRotation2d())
                 : new ChassisSpeeds(xSpeed, ySpeed, rot));
-    SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, Constants.MAX_DRIVING_SPEED);
+    SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, Constants.MAX_DRIVE_SPEED);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
@@ -68,7 +74,8 @@ public class Drivetrain {
   }
 
   /** Updates the field relative position of the robot. */
-  public void updateOdometry() {
+  public void updateOdometry()
+  {
     m_odometry.update(
         m_navx.getRotation2d(),
         m_frontLeft.getState(),

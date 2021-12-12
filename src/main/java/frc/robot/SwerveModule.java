@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.wpilibj.Encoder;
 import com.ctre.phoenix.sensors.CANCoder;
 import edu.wpi.first.wpilibj.PWMSparkMax;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
@@ -39,7 +40,7 @@ public class SwerveModule {
   // private static final double kDriveMotorGearRatio = 8.14;
   // private static final double kTurningMotorGearRatio = 12.8;
 
-  private static final double kModuleMaxAngularVelocity = Constants.MAX_TURNING_SPEED;
+  private static final double kModuleMaxAngularVelocity = Constants.MAX_TURN_SPEED;
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
 
@@ -51,7 +52,7 @@ public class SwerveModule {
   // private Encoder m_driveEncoder;
   private final CANCoder m_turningEncoder; //= new CANCoder();
 
-  private final int m_turningEncoderOffset;
+  private final double m_turningEncoderOffset;
 
   private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
 
@@ -67,8 +68,8 @@ public class SwerveModule {
   //First parameter is static gain (how much voltage it takes to move)
   //Second parameters is veloctiy gain (how much additional speed you get per volt)
   
-  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5);
+  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.22, 2.2, 0.16);
+  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5, 0.01);
 
   /**
    * Constructs a SwerveModule.
@@ -84,6 +85,7 @@ public class SwerveModule {
 
     m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
     configTalon(m_driveMotor, smc.driveMotorInverted);
+    // Do not invert any of the turning motors
     configTalon(m_turningMotor, false);
 
     m_turningEncoderOffset = smc.turningMotorEncoderOffset;
@@ -105,7 +107,7 @@ public class SwerveModule {
     m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
-  private static void configTalon(TalonFX motor, boolean inverted)
+    private static void configTalon(TalonFX motor, boolean inverted)
     {
         motor.configFactoryDefault();
         motor.setInverted(inverted);
@@ -124,7 +126,8 @@ public class SwerveModule {
    *
    * @return The current state of the module.
    */
-  public SwerveModuleState getState() {
+  public SwerveModuleState getState()
+  {
     return new SwerveModuleState(getDrivingEncoderRate(), new Rotation2d(getTurningEncoderPosition()));
   }
 
@@ -133,7 +136,8 @@ public class SwerveModule {
    *
    * @param desiredState Desired state with speed and angle.
    */
-  public void setDesiredState(SwerveModuleState desiredState) {
+  public void setDesiredState(SwerveModuleState desiredState)
+  {
     // Optimize the reference state to avoid spinning further than 90 degrees
     SwerveModuleState state =
         SwerveModuleState.optimize(desiredState, new Rotation2d(getTurningEncoderPosition()));
@@ -152,20 +156,25 @@ public class SwerveModule {
         m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     //FIXME Convert to Talon FX
-    m_driveMotor.set(ControlMode.PercentOutput, driveOutput + driveFeedforward);
-    m_turningMotor.set(ControlMode.PercentOutput, turnOutput + turnFeedforward);
+    var driveVoltage = normalizeVoltage(driveOutput + driveFeedforward);
+    var turnVoltage = normalizeVoltage(turnOutput + turnFeedforward);
+    m_driveMotor.set(ControlMode.PercentOutput, driveVoltage);
+    m_turningMotor.set(ControlMode.PercentOutput, turnVoltage);
   }
 
   public double getDrivingEncoderRate()
   {
-    double velocity = (((m_driveMotor.getSelectedSensorVelocity() * 10) / Constants.DRIVE_MOTOR_ENCODER_RESOLUTION) / 8.14) * (2 * Math.PI * Constants.WHEEL_RADIUS_METERS);
+    double velocity = m_driveMotor.getSelectedSensorVelocity() * Constants.DRIVE_ENCODER_RATE_TO_METERS_PER_SEC;
     // FIXME Units conversion?
     System.out.println(m_driveMotor.getDeviceID() + " " + velocity);
     return velocity;
   }
 
-  private double getTurningEncoderPosition()
+  public double getTurningEncoderPosition()
   {
+    // return m_turningEncoder.getPosition(); 
+    // Reset facory default in Phoenix Tuner to make the 0 go forward 
+    // while wheel bolts facing in, then save, then get absolute value and put in enum
     return m_turningEncoder.getAbsolutePosition() - m_turningEncoderOffset; 
   }
 
@@ -173,5 +182,17 @@ public class SwerveModule {
   public void resetTurningMotorEncoder()
   {
     // m_turningEncoder.setPosition(m_turningEncoderOffset);
+  }
+
+  /**
+   * Normalizes voltage from -1 to 1 using current battery voltage
+   * 
+   * @param outputVolts
+   * @return normalizedVoltage
+   */
+  public static double normalizeVoltage(double outputVolts)
+  {
+    var normalizedVoltage = outputVolts / RobotController.getBatteryVoltage();
+    return normalizedVoltage;
   }
 }

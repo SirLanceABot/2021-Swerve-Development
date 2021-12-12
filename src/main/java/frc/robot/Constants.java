@@ -21,14 +21,14 @@ public final class Constants
      * The left-to-right distance between the drivetrain wheels
      *
      * Should be measured from center to center.
-     * Measured in inches, x-coordinate
+     * Measured in inches, y-coordinate
      */
     public static final double DRIVETRAIN_TRACKWIDTH_METERS = 23.5 * INCHES_TO_METERS;
     /**
      * The front-to-back distance between the drivetrain wheels.
      *
      * Should be measured from center to center.
-     * Measured in inches, y-coordinate
+     * Measured in inches, x-coordinate
      */
     public static final double DRIVETRAIN_WHEELBASE_METERS = 23.5 * INCHES_TO_METERS;
 
@@ -37,12 +37,14 @@ public final class Constants
     public static final int DRIVETRAIN_NAVX_ID = 0; // FIXEDME Set Pigeon ID
 
     // Drivetrain constants
-    public static final double MAX_DRIVING_SPEED = 3.0; // 3 meters per second
-    public static final double MAX_TURNING_SPEED = Math.PI; // 1/2 rotation per second
+    public static final double MAX_DRIVE_SPEED = 3.0; // 3 meters per second
+    public static final double MAX_TURN_SPEED = Math.PI; // 1/2 rotation per second
     public static final int DRIVE_MOTOR_ENCODER_RESOLUTION = 2048;
-    public static final int TURNING_MOTOR_ENCODER_RESOLUTION = 4096;
+    public static final int TURN_MOTOR_ENCODER_RESOLUTION = 4096;
     public static final double DRIVE_MOTOR_GEAR_RATIO = 8.14;
-    public static final double TURNING_MOTOR_GEAR_RATIO = 12.8;
+    public static final double TURN_MOTOR_GEAR_RATIO = 12.8;
+
+    public static final double DRIVE_ENCODER_RATE_TO_METERS_PER_SEC = ((10 / DRIVE_MOTOR_ENCODER_RESOLUTION) / DRIVE_MOTOR_GEAR_RATIO) * (2 * Math.PI * WHEEL_RADIUS_METERS);
 
     /* Correct values that have been moved to enum
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 7; // FIXEDME Set front left module drive motor ID
@@ -68,15 +70,15 @@ public final class Constants
     
     static enum SwerveModuleConstants
     {
-        frontLeft(7, true, 8, 9, 1899){},
-        frontRight(10, false, 11, 12, 3473){},
-        backLeft(4, true, 5, 6, 3976){},
-        backRight(1, false, 2, 3, 1177){};
+        frontLeft(7, true, 8, 167.871, 9){},
+        frontRight(10, false, 11, 304.717, 12){},
+        backLeft(4, true, 5, 349.365, 6){},
+        backRight(1, false, 2, 103.359, 3){};
 
         int driveMotorChannel;
         boolean driveMotorInverted;
         int turningMotorEncoder;
-        int turningMotorEncoderOffset;
+        double turningMotorEncoderOffset;
         int turningMotorChannel;
 
         /**
@@ -86,11 +88,16 @@ public final class Constants
          * @param turningMotorEncoderOffset
          * @param turningMotorChannel
          */
-        private SwerveModuleConstants(int driveMotorChannel, boolean driveMotorInverted, int turningMotorEncoder, int turningMotorEncoderOffset, int turningMotorChannel)
+        private SwerveModuleConstants(  int driveMotorChannel, 
+                                        boolean driveMotorInverted, 
+                                        int turningMotorEncoder, 
+                                        double turningMotorEncoderOffset, 
+                                        int turningMotorChannel)
         {
             this.driveMotorChannel = driveMotorChannel;
             this.driveMotorInverted = driveMotorInverted;
             this.turningMotorEncoder = turningMotorEncoder;
+            // FIXME make not strange conversion
             this.turningMotorEncoderOffset = turningMotorEncoderOffset;
             this.turningMotorChannel = turningMotorChannel;
         }

@@ -20,10 +20,17 @@ public class Robot extends TimedRobot
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
   @Override
+  public void testPeriodic()
+  {
+
+  }
+
+  @Override
   public void autonomousPeriodic()
   {
-    driveWithJoystick(false);
-    m_swerve.updateOdometry();
+    m_swerve.drive(0.5, 0.0, 0.0, false);
+    // driveWithJoystick(false);
+    // m_swerve.updateOdometry();
   }
 
   @Override
@@ -44,18 +51,18 @@ public class Robot extends TimedRobot
 
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
-    double xSpeed = -m_xspeedLimiter.calculate(yLeft) * Constants.MAX_DRIVING_SPEED;
+    double xSpeed = -m_xspeedLimiter.calculate(yLeft) * Constants.MAX_DRIVE_SPEED;
 
     // Get the y speed or sideways/strafe speed. We are inverting this because
     // we want a positive value when we pull to the left. Xbox controllers
     // return positive values when you pull to the right by default.
-    double ySpeed = -m_yspeedLimiter.calculate(xLeft) * Constants.MAX_DRIVING_SPEED;
+    double ySpeed = -m_yspeedLimiter.calculate(xLeft) * Constants.MAX_DRIVE_SPEED;
 
     // Get the rate of angular rotation. We are inverting this because we want a
     // positive value when we pull to the left (remember, CCW is positive in
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
-    double rot = -m_rotLimiter.calculate(xRight) * Constants.MAX_TURNING_SPEED;
+    double rot = -m_rotLimiter.calculate(xRight) * Constants.MAX_TURN_SPEED;
 
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
     System.out.printf("xSpeed = %f, ySpeed = %f, rot = %f\n", xSpeed, ySpeed, rot);
