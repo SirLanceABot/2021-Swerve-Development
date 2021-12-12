@@ -27,9 +27,9 @@ import com.ctre.phoenix.sensors.CANCoder;
 
 public class SwerveModule {
   //FIXME Change Wheel Radius and EncoderResolution
-  public static final double kInchesToMeters = 0.0254;
-  private static final double kWheelRadius = 2 * kInchesToMeters;
-  private static final int kEncoderResolution = 2048;
+  // public static final double kInchesToMeters = 0.0254;
+  // private static final double kWheelRadius = 2 * kInchesToMeters;
+  // private static final int kEncoderResolution = 2048;
   // FIXME Use these variables probably after we removed in a merge conflict
   // private static final double kWheelRadiusInches = 2;
   // private static final double kInchesToMeters = 0.0254;
@@ -39,7 +39,7 @@ public class SwerveModule {
   // private static final double kDriveMotorGearRatio = 8.14;
   // private static final double kTurningMotorGearRatio = 12.8;
 
-  private static final double kModuleMaxAngularVelocity = Drivetrain.kMaxAngularSpeed;
+  private static final double kModuleMaxAngularVelocity = Constants.MAX_TURNING_SPEED;
   private static final double kModuleMaxAngularAcceleration =
       2 * Math.PI; // radians per second squared
 
@@ -158,7 +158,7 @@ public class SwerveModule {
 
   public double getDrivingEncoderRate()
   {
-    double velocity = (((m_driveMotor.getSelectedSensorVelocity() * 10) / kEncoderResolution) / 8.14) * (2 * Math.PI * kWheelRadius);
+    double velocity = (((m_driveMotor.getSelectedSensorVelocity() * 10) / Constants.DRIVE_MOTOR_ENCODER_RESOLUTION) / 8.14) * (2 * Math.PI * Constants.WHEEL_RADIUS_METERS);
     // FIXME Units conversion?
     System.out.println(m_driveMotor.getDeviceID() + " " + velocity);
     return velocity;

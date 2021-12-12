@@ -13,17 +13,17 @@ import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain {
-  public static final double kMaxSpeed = 3.0; // 3 meters per second
-  public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
-  public static final double kInchesToMeters = 0.0254;
-  //inches, distance from center, robot is a square so length and width are the same
-  public static final double kRobotWidth = 23.5; //inches, y-coordinate
-  public static final double kRobotLength = 23.5; //inches, x-coordinate
+//   public static final double kMaxSpeed = 3.0; // 3 meters per second
+//   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
+//   public static final double kInchesToMeters = 0.0254;
+//   //inches, distance from center, robot is a square so length and width are the same
+//   public static final double kRobotWidth = 23.5; //inches, y-coordinate
+//   public static final double kRobotLength = 23.5; //inches, x-coordinate
 
-  private final Translation2d m_frontLeftLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, kRobotLength / 2 * kInchesToMeters);
-  private final Translation2d m_frontRightLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, -kRobotLength / 2 * kInchesToMeters);
-  private final Translation2d m_backLeftLocation = new Translation2d(-kRobotLength / 2 * kInchesToMeters, kRobotLength / 2 * kInchesToMeters);
-  private final Translation2d m_backRightLocation = new Translation2d(-kRobotLength / 2 * kInchesToMeters, -kRobotLength / 2 * kInchesToMeters);
+  private final Translation2d m_frontLeftLocation = new Translation2d(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
+  private final Translation2d m_frontRightLocation = new Translation2d(Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, -Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
+  private final Translation2d m_backLeftLocation = new Translation2d(-Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
+  private final Translation2d m_backRightLocation = new Translation2d(-Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2, -Constants.DRIVETRAIN_WHEELBASE_METERS / 2);
 
   private final SwerveModule m_frontLeft = new SwerveModule(Constants.SwerveModuleConstants.frontLeft);
   private final SwerveModule m_frontRight = new SwerveModule(Constants.SwerveModuleConstants.frontRight);
@@ -40,7 +40,8 @@ public class Drivetrain {
   private final SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(m_kinematics, m_navx.getRotation2d());
 
-  public Drivetrain() {
+  public Drivetrain()
+  {
     m_navx.reset();
   }
 
@@ -59,7 +60,7 @@ public class Drivetrain {
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_navx.getRotation2d())
                 : new ChassisSpeeds(xSpeed, ySpeed, rot));
-    SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, kMaxSpeed);
+    SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, Constants.MAX_DRIVING_SPEED);
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
