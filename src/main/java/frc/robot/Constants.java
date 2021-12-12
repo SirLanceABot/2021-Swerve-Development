@@ -30,7 +30,16 @@ public final class Constants {
 
     public static final int FALCON_UNITS_PER_ROTATION = 2048;
 
-    /* Correct values
+    private static final int ENCODER_RESOLUTION = 2048;
+    private static final double WHEEL_RADIUS_INCHES = 2;
+    private static final double INCHEST_TO_METERS = 0.0254;
+    private static final double WHEEL_RADIUS_METERS = WHEEL_RADIUS_INCHES * INCHEST_TO_METERS;
+    private static final int DRIVE_MOTOR_ENCODER_RESOLUTION = 2048;
+    private static final int TURNING_MOTOR_ENCODER_RESOLUTION = 4096;
+    private static final double DRIVE_MOTOR_GEAR_RATIO = 8.14;
+    private static final double TURNING_MOTOR_GEAR_RATIO = 12.8;
+
+    /* Correct values that have been moved to enum
     public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 7; // FIXEDME Set front left module drive motor ID
     public static final int FRONT_LEFT_MODULE_STEER_MOTOR = 9; // FIXEDME Set front left module steer motor ID
     public static final int FRONT_LEFT_MODULE_STEER_ENCODER = 8; // FIXEDME Set front left steer encoder ID
