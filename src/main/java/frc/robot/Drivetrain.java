@@ -4,13 +4,8 @@
 
 package frc.robot;
 
-<<<<<<< HEAD
-import frc.sensors.NavX;
-import edu.wpi.first.wpilibj.AnalogGyro;
-=======
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SerialPort;
->>>>>>> Darren - SwerveBot almost working besides velocity
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
@@ -21,12 +16,9 @@ public class Drivetrain {
   public static final double kMaxSpeed = 3.0; // 3 meters per second
   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
   public static final double kInchesToMeters = 0.0254;
-<<<<<<< HEAD
-  public static final double kRobotLength = 23.5; //inches, distance from center, robot is a square so length and width are the same
-=======
+  //inches, distance from center, robot is a square so length and width are the same
   public static final double kRobotWidth = 23.5; //inches, y-coordinate
   public static final double kRobotLength = 23.5; //inches, x-coordinate
->>>>>>> Darren - SwerveBot almost working besides velocity
 
   private final Translation2d m_frontLeftLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, kRobotLength / 2 * kInchesToMeters);
   private final Translation2d m_frontRightLocation = new Translation2d(kRobotLength / 2 * kInchesToMeters, -kRobotLength / 2 * kInchesToMeters);
@@ -38,12 +30,8 @@ public class Drivetrain {
   private final SwerveModule m_backLeft = new SwerveModule(Constants.SwerveModuleConstants.backLeft);
   private final SwerveModule m_backRight = new SwerveModule(Constants.SwerveModuleConstants.backRight);
 
-<<<<<<< HEAD
-  private final NavX m_gyro = NavX.getInstance();
-=======
   //FIXME Convert gyro to NavX
   private final AHRS m_navx = new AHRS(SerialPort.Port.kUSB);
->>>>>>> Darren - SwerveBot almost working besides velocity
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
