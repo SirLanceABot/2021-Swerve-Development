@@ -10,6 +10,8 @@ import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Represents a swerve drive style drivetrain. */
 public class Drivetrain 
@@ -26,10 +28,10 @@ public class Drivetrain
   private final Translation2d m_backLeftLocation = new Translation2d(-Constants.DRIVETRAIN_WHEELBASE_METERS / 2, Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2);
   private final Translation2d m_backRightLocation = new Translation2d(-Constants.DRIVETRAIN_WHEELBASE_METERS / 2, -Constants.DRIVETRAIN_TRACKWIDTH_METERS / 2);
 
-  private final SwerveModule m_frontLeft = new SwerveModule(Constants.SwerveModuleConstants.frontLeft);
-  private final SwerveModule m_frontRight = new SwerveModule(Constants.SwerveModuleConstants.frontRight);
-  private final SwerveModule m_backLeft = new SwerveModule(Constants.SwerveModuleConstants.backLeft);
-  private final SwerveModule m_backRight = new SwerveModule(Constants.SwerveModuleConstants.backRight);
+  private final SwerveModule m_frontLeft = new SwerveModule(Constants.SwerveModule.frontLeft);
+  private final SwerveModule m_frontRight = new SwerveModule(Constants.SwerveModule.frontRight);
+  private final SwerveModule m_backLeft = new SwerveModule(Constants.SwerveModule.backLeft);
+  private final SwerveModule m_backRight = new SwerveModule(Constants.SwerveModule.backRight);
 
   //FIXME Convert gyro to NavX
   private final AHRS m_navx = new AHRS(SerialPort.Port.kUSB);
@@ -72,6 +74,9 @@ public class Drivetrain
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
+
+    printTurnEncoderPosition();
+    printDesiredStates(swerveModuleStates);
   }
 
   /** Updates the field relative position of the robot. */
@@ -88,5 +93,21 @@ public class Drivetrain
   public void printNavX()
   {
     System.out.println("Yaw = " + m_navx.getYaw() + "Rot2d = " + m_navx.getRotation2d());
+  }
+
+  public void printTurnEncoderPosition()
+  {
+    SmartDashboard.putNumber("frontLeft  Turn Encoder", m_frontLeft.getTurningEncoderPosition());
+    SmartDashboard.putNumber("frontRight Turn Encoder", m_frontRight.getTurningEncoderPosition());
+    SmartDashboard.putNumber("backLeft   Turn Encoder", m_backLeft.getTurningEncoderPosition());
+    SmartDashboard.putNumber("backRight  Turn Encoder", m_backRight.getTurningEncoderPosition());
+  }
+
+  public void printDesiredStates(SwerveModuleState[] sms)
+  {
+    SmartDashboard.putString("frontLeft  Desired State", sms[0].toString());
+    SmartDashboard.putString("frontRight Desired State", sms[1].toString());
+    SmartDashboard.putString("backLeft   Desired State", sms[2].toString());
+    SmartDashboard.putString("backRight  Desired State", sms[3].toString());
   }
 }

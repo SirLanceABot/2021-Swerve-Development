@@ -37,14 +37,19 @@ public final class Constants
   public static final int DRIVETRAIN_NAVX_ID = 0; // FIXEDME Set Pigeon ID
 
   // Drivetrain constants
-  public static final double MAX_DRIVE_SPEED = 0.5; // 3 meters per second
-  public static final double MAX_TURN_SPEED = Math.PI / 3.0; // 1/2 rotation per second
+  // FIXME Check the max speeds and accelerations
+  public static final double MAX_DRIVE_SPEED = 1.5; // 3 meters per second
+  public static final double MAX_TURN_SPEED = Math.PI; // 1/2 rotation per second
+  public static final double MAX_TURN_ACCELERATION = 2 * Math.PI; // radians per second per second
+
   public static final int DRIVE_MOTOR_ENCODER_RESOLUTION = 2048;
   public static final int TURN_MOTOR_ENCODER_RESOLUTION = 4096;
   public static final double DRIVE_MOTOR_GEAR_RATIO = 8.14;
   public static final double TURN_MOTOR_GEAR_RATIO = 12.8;
 
-  public static final double DRIVE_ENCODER_RATE_TO_METERS_PER_SEC = ((10 / DRIVE_MOTOR_ENCODER_RESOLUTION) / DRIVE_MOTOR_GEAR_RATIO) * (2 * Math.PI * WHEEL_RADIUS_METERS);
+  public static final double DRIVE_ENCODER_RATE_TO_METERS_PER_SEC = 
+    ((10 / DRIVE_MOTOR_ENCODER_RESOLUTION) / DRIVE_MOTOR_GEAR_RATIO) * (2 * Math.PI * WHEEL_RADIUS_METERS);
+  public static final double MAX_BATTERY_VOLTAGE = 12.0;
 
   /* Correct values that have been moved to enum
   public static final int FRONT_LEFT_MODULE_DRIVE_MOTOR = 7; // FIXEDME Set front left module drive motor ID
@@ -68,13 +73,14 @@ public final class Constants
   public static final double BACK_RIGHT_MODULE_STEER_OFFSET = 1177;//-Math.toRadians(103.447265625 + 180.0); // FIXEDME Measure and set back right steer offset
   */
   
-  static enum SwerveModuleConstants
+  static enum SwerveModule
   {
-    frontLeft(7, true, 8, 167.871, 9){},
-    frontRight(10, false, 11, 304.717, 12){},
-    backLeft(4, true, 5, 349.365, 6){},
-    backRight(1, false, 2, 103.359, 3){};
+    frontLeft("Front Left", 7, true, 8, 167.871, 9){},
+    frontRight("Front Right", 10, false, 11, 304.717, 12){},
+    backLeft("Back Left", 4, true, 5, 349.365, 6){},
+    backRight("Back Right", 1, false, 2, 103.359, 3){};
 
+    String moduleName;
     int driveMotorChannel;
     boolean driveMotorInverted;
     int turningMotorEncoder;
@@ -88,18 +94,40 @@ public final class Constants
      * @param turningMotorEncoderOffset
      * @param turningMotorChannel
      */
-    private SwerveModuleConstants(  int driveMotorChannel, 
+    private SwerveModule(  String moduleName,
+                                    int driveMotorChannel, 
                                     boolean driveMotorInverted, 
                                     int turningMotorEncoder, 
                                     double turningMotorEncoderOffset, 
                                     int turningMotorChannel)
     {
+      this.moduleName = moduleName;
       this.driveMotorChannel = driveMotorChannel;
       this.driveMotorInverted = driveMotorInverted;
       this.turningMotorEncoder = turningMotorEncoder;
       // FIXME make not strange conversion
       this.turningMotorEncoderOffset = turningMotorEncoderOffset;
       this.turningMotorChannel = turningMotorChannel;
+    }
+
+    public static String dump()
+    {
+      StringBuilder sb = new StringBuilder(400);
+      
+      sb.append("   Name       DriveMotor     Turn Encoder  Turn Motor\n");
+      sb.append("           Channel Inverted Channel Offset   Channel\n");
+
+      for(SwerveModule smc:SwerveModule.values())
+      {
+        sb.append(String.format("%10s  %3d     %5b    %3d    %6.1f    %3d\n",
+            smc.name(),
+            smc.driveMotorChannel,
+            smc.driveMotorInverted,
+            smc.turningMotorEncoder,
+            smc.turningMotorEncoderOffset,
+            smc.turningMotorChannel));
+      }
+      return sb.toString();
     }
   }
 }

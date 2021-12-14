@@ -41,9 +41,9 @@ public class SwerveModule
   // private static final double kDriveMotorGearRatio = 8.14;
   // private static final double kTurningMotorGearRatio = 12.8;
 
-  private static final double kModuleMaxAngularVelocity = Constants.MAX_TURN_SPEED;
-  private static final double kModuleMaxAngularAcceleration =
-      2 * Math.PI; // radians per second squared
+  // private static final double kModuleMaxAngularVelocity = Constants.MAX_TURN_SPEED;
+  // private static final double kModuleMaxAngularAcceleration =
+  //     2 * Math.PI; // radians per second squared
 
   //FIXME Convert to Talon FX
   private final TalonFX m_driveMotor;
@@ -54,16 +54,17 @@ public class SwerveModule
   private final CANCoder m_turningEncoder; //= new CANCoder();
 
   private final double m_turningEncoderOffset;
+  private final String m_moduleName;
 
-  private final PIDController m_drivePIDController = new PIDController(0.1, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
 
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
-          0.1,
+          1,
           0,
           0,
           new TrapezoidProfile.Constraints(
-              kModuleMaxAngularVelocity, kModuleMaxAngularAcceleration));
+            Constants.MAX_TURN_SPEED, Constants.MAX_TURN_ACCELERATION));
 
   //FIXME: Gains are for example purposes only - must be determined for your own robot!
   //First parameter is static gain (how much voltage it takes to move)
@@ -78,11 +79,12 @@ public class SwerveModule
    * @param driveMotorChannel ID for the drive motor.
    * @param turningMotorChannel ID for the turning motor.
    */
-  public SwerveModule(Constants.SwerveModuleConstants smc)
+  public SwerveModule(Constants.SwerveModule smc)
   {
     m_driveMotor = new TalonFX(smc.driveMotorChannel);
     m_turningEncoder = new CANCoder(smc.turningMotorEncoder);
     m_turningMotor = new TalonFX(smc.turningMotorChannel);
+    m_moduleName = smc.moduleName;
 
     m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
     configTalon(m_driveMotor, smc.driveMotorInverted);
@@ -90,6 +92,7 @@ public class SwerveModule
     configTalon(m_turningMotor, false);
 
     m_turningEncoderOffset = smc.turningMotorEncoderOffset;
+    m_turningEncoder.setPosition(m_turningEncoder.getAbsolutePosition());
 
     // resetTurningMotorEncoder();
 
@@ -119,7 +122,8 @@ public class SwerveModule
     // motor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 20, 25, 1.0));
     // motor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 10, 15, 0.5));
     // motor.configOpenloopRamp(openLoopRamp);
-    motor.configVoltageCompSaturation(11);
+    motor.configVoltageCompSaturation(Constants.MAX_BATTERY_VOLTAGE);
+    motor.enableVoltageCompensation(true);
   }
 
   /**
@@ -157,10 +161,10 @@ public class SwerveModule
         m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     //FIXME Convert to Talon FX
-    var driveVoltage = normalizeVoltage(driveOutput + driveFeedforward);
-    var turnVoltage = normalizeVoltage(turnOutput + turnFeedforward);
-    m_driveMotor.set(ControlMode.PercentOutput, driveVoltage);
-    m_turningMotor.set(ControlMode.PercentOutput, turnVoltage);
+    var normalizedDriveVoltage = normalizeVoltage(driveOutput + driveFeedforward);
+    var normalizedTurnVoltage = normalizeVoltage(turnOutput + turnFeedforward);
+    m_driveMotor.set(ControlMode.PercentOutput, normalizedDriveVoltage);
+    m_turningMotor.set(ControlMode.PercentOutput, normalizedTurnVoltage);
   }
 
   public double getDrivingEncoderRate()
@@ -173,6 +177,7 @@ public class SwerveModule
 
   public double getTurningEncoderPosition()
   {
+    // Used the Phoenix tuner to change the return value to radians
     return m_turningEncoder.getPosition(); 
     // Reset facory default in Phoenix Tuner to make the 0 go forward 
     // while wheel bolts facing in, then save, then get absolute value and put in enum
@@ -193,7 +198,7 @@ public class SwerveModule
    */
   public static double normalizeVoltage(double outputVolts)
   {
-    var normalizedVoltage = outputVolts / RobotController.getBatteryVoltage();
+    var normalizedVoltage = outputVolts / Constants.MAX_BATTERY_VOLTAGE; //RobotController.getBatteryVoltage();
     return normalizedVoltage;
   }
 }

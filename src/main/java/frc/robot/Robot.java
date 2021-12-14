@@ -20,6 +20,12 @@ public class Robot extends TimedRobot
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
   @Override
+  public void robotInit()
+  {
+    System.out.println(Constants.SwerveModule.dump());
+  }
+
+  @Override
   public void testPeriodic()
   {
 
@@ -45,9 +51,11 @@ public class Robot extends TimedRobot
     double xLeft = m_controller.getX(GenericHID.Hand.kLeft);
     double xRight = m_controller.getX(GenericHID.Hand.kRight);
 
-    yLeft = (Math.abs(yLeft) < 0.1) ? 0.0 : yLeft;
-    xLeft = (Math.abs(xLeft) < 0.1) ? 0.0 : xLeft;
-    xRight = (Math.abs(xRight) < 0.1) ? 0.0 : xRight;
+    System.out.printf("yLeft = %f, xLeft = %f, xRight = %f\n", yLeft, xLeft, xRight);
+    yLeft = (Math.abs(yLeft) < 0.15) ? 0.0 : yLeft;
+    xLeft = (Math.abs(xLeft) < 0.15) ? 0.0 : xLeft;
+    xRight = (Math.abs(xRight) < 0.15) ? 0.0 : xRight;
+    
 
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
