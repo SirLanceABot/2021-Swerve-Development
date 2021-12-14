@@ -26,7 +26,8 @@ import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 
-public class SwerveModule {
+public class SwerveModule 
+{
   //FIXME Change Wheel Radius and EncoderResolution
   // public static final double kInchesToMeters = 0.0254;
   // private static final double kWheelRadius = 2 * kInchesToMeters;
@@ -54,11 +55,11 @@ public class SwerveModule {
 
   private final double m_turningEncoderOffset;
 
-  private final PIDController m_drivePIDController = new PIDController(1, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(0.1, 0, 0);
 
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
-          1,
+          0.1,
           0,
           0,
           new TrapezoidProfile.Constraints(
@@ -107,19 +108,19 @@ public class SwerveModule {
     m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
-    private static void configTalon(TalonFX motor, boolean inverted)
-    {
-        motor.configFactoryDefault();
-        motor.setInverted(inverted);
-        motor.setNeutralMode(NeutralMode.Brake);
-        motor.configForwardSoftLimitEnable(false);
-        motor.configReverseSoftLimitEnable(false);
-        motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor); //TODO Convert to newer config API
-        // motor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 20, 25, 1.0));
-        // motor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 10, 15, 0.5));
-        // motor.configOpenloopRamp(openLoopRamp);
-        motor.configVoltageCompSaturation(11);
-    }
+  private static void configTalon(TalonFX motor, boolean inverted)
+  {
+    motor.configFactoryDefault();
+    motor.setInverted(inverted);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configForwardSoftLimitEnable(false);
+    motor.configReverseSoftLimitEnable(false);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor); //TODO Convert to newer config API
+    // motor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 20, 25, 1.0));
+    // motor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 10, 15, 0.5));
+    // motor.configOpenloopRamp(openLoopRamp);
+    motor.configVoltageCompSaturation(11);
+  }
 
   /**
    * Returns the current state of the module.
@@ -172,10 +173,10 @@ public class SwerveModule {
 
   public double getTurningEncoderPosition()
   {
-    // return m_turningEncoder.getPosition(); 
+    return m_turningEncoder.getPosition(); 
     // Reset facory default in Phoenix Tuner to make the 0 go forward 
     // while wheel bolts facing in, then save, then get absolute value and put in enum
-    return m_turningEncoder.getAbsolutePosition() - m_turningEncoderOffset; 
+    // return m_turningEncoder.getAbsolutePosition() - m_turningEncoderOffset; 
   }
 
   // FIXME Fix reset turning motor encoder

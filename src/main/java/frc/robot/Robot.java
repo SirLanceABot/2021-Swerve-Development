@@ -65,6 +65,7 @@ public class Robot extends TimedRobot
     double rot = -m_rotLimiter.calculate(xRight) * Constants.MAX_TURN_SPEED;
 
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
-    System.out.printf("xSpeed = %f, ySpeed = %f, rot = %f\n", xSpeed, ySpeed, rot);
+    // System.out.printf("xSpeed = %f, ySpeed = %f, rot = %f\n", xSpeed, ySpeed, rot);
+    // m_swerve.printNavX();
   }
 }

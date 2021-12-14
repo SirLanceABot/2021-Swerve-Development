@@ -12,7 +12,8 @@ import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 
 /** Represents a swerve drive style drivetrain. */
-public class Drivetrain {
+public class Drivetrain 
+{
 //   public static final double kMaxSpeed = 3.0; // 3 meters per second
 //   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
 //   public static final double kInchesToMeters = 0.0254;
@@ -82,5 +83,10 @@ public class Drivetrain {
         m_frontRight.getState(),
         m_backLeft.getState(),
         m_backRight.getState());
+  }
+
+  public void printNavX()
+  {
+    System.out.println("Yaw = " + m_navx.getYaw() + "Rot2d = " + m_navx.getRotation2d());
   }
 }
