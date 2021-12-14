@@ -60,7 +60,7 @@ public class SwerveModule
 
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
-          1,
+          1.5,
           0,
           0,
           new TrapezoidProfile.Constraints(

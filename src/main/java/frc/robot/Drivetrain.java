@@ -77,6 +77,7 @@ public class Drivetrain
 
     printTurnEncoderPosition();
     printDesiredStates(swerveModuleStates);
+    printNavX();
   }
 
   /** Updates the field relative position of the robot. */
@@ -92,7 +93,8 @@ public class Drivetrain
 
   public void printNavX()
   {
-    System.out.println("Yaw = " + m_navx.getYaw() + "Rot2d = " + m_navx.getRotation2d());
+    // System.out.println("Yaw = " + m_navx.getYaw() + "Rot2d = " + m_navx.getRotation2d());
+    SmartDashboard.putNumber("NavX", m_navx.getRotation2d().getRadians());
   }
 
   public void printTurnEncoderPosition()
@@ -105,9 +107,14 @@ public class Drivetrain
 
   public void printDesiredStates(SwerveModuleState[] sms)
   {
-    SmartDashboard.putString("frontLeft  Desired State", sms[0].toString());
-    SmartDashboard.putString("frontRight Desired State", sms[1].toString());
-    SmartDashboard.putString("backLeft   Desired State", sms[2].toString());
-    SmartDashboard.putString("backRight  Desired State", sms[3].toString());
+    SmartDashboard.putNumber("frontLeft  Desired State Angle", sms[0].angle.getRadians());
+    SmartDashboard.putNumber("frontRight Desired State Angle", sms[1].angle.getRadians());
+    SmartDashboard.putNumber("backLeft   Desired State Angle", sms[2].angle.getRadians());
+    SmartDashboard.putNumber("backRight  Desired State Angle", sms[3].angle.getRadians());
+
+    SmartDashboard.putNumber("frontLeft  Desired State Speed", sms[0].speedMetersPerSecond);
+    SmartDashboard.putNumber("frontRight Desired State Speed", sms[1].speedMetersPerSecond);
+    SmartDashboard.putNumber("backLeft   Desired State Speed", sms[2].speedMetersPerSecond);
+    SmartDashboard.putNumber("backRight  Desired State Speed", sms[3].speedMetersPerSecond);    
   }
 }
