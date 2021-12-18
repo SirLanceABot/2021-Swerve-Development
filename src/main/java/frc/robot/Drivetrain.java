@@ -4,7 +4,11 @@
 
 package frc.robot;
 
+import javax.print.attribute.standard.Fidelity;
+
 import com.kauailabs.navx.frc.AHRS;
+
+import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
@@ -14,7 +18,7 @@ import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 /** Represents a swerve drive style drivetrain. */
-public class Drivetrain 
+public class Drivetrain //extends RobotDriveBase
 {
 //   public static final double kMaxSpeed = 3.0; // 3 meters per second
 //   public static final double kMaxAngularSpeed = Math.PI; // 1/2 rotation per second
@@ -64,19 +68,31 @@ public class Drivetrain
   @SuppressWarnings("ParameterName")
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative)
   {
-    var swerveModuleStates =
-        m_kinematics.toSwerveModuleStates(
-            fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_navx.getRotation2d())
-                : new ChassisSpeeds(xSpeed, ySpeed, rot));
+    ChassisSpeeds chassisSpeeds;
+    SwerveModuleState[] swerveModuleStates;
+
+    if(fieldRelative)
+      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_navx.getRotation2d());
+    else
+      chassisSpeeds = new ChassisSpeeds(xSpeed, ySpeed, rot);
+    
+    swerveModuleStates = m_kinematics.toSwerveModuleStates(chassisSpeeds);
+    // var swerveModuleStates =
+    //     m_kinematics.toSwerveModuleStates(
+    //         fieldRelative
+    //             ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, m_navx.getRotation2d())
+    //             : new ChassisSpeeds(xSpeed, ySpeed, rot));
+
     SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, Constants.MAX_DRIVE_SPEED);
+    printDesiredStates(swerveModuleStates);
+    
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
 
     printTurnEncoderPosition();
-    printDesiredStates(swerveModuleStates);
+
     printNavX();
   }
 
@@ -90,6 +106,18 @@ public class Drivetrain
         m_backLeft.getState(),
         m_backRight.getState());
   }
+
+  // @Override
+  // public void stopMotor()
+  // {
+  //   m_frontLeft
+  // }
+
+  // @Override
+  // public String getDescription()
+  // {
+  //   return "Swerve Drivetrain";
+  // }
 
   public void printNavX()
   {

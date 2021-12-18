@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot
 {
@@ -26,17 +27,43 @@ public class Robot extends TimedRobot
   }
 
   @Override
+  public void robotPeriodic()
+  {
+    
+  }
+
+  @Override
+  public void testInit()
+  {
+
+  }
+
+  @Override
   public void testPeriodic()
   {
 
   }
 
   @Override
-  public void autonomousPeriodic()
+  public void autonomousInit()
   {
-    m_swerve.drive(0.5, 0.0, 0.0, false);
+    // m_swerve.drive(3.0, 0.0, 0.0, false);
     // driveWithJoystick(false);
     // m_swerve.updateOdometry();
+  }
+
+  @Override
+  public void autonomousPeriodic()
+  {
+    m_swerve.drive(3.0, 0.0, 0.0, false);
+    // driveWithJoystick(false);
+    // m_swerve.updateOdometry();
+  }
+
+  @Override
+  public void teleopInit()
+  {
+
   }
 
   @Override

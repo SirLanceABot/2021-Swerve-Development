@@ -38,7 +38,7 @@ public final class Constants
 
   // Drivetrain constants
   // FIXME Check the max speeds and accelerations
-  public static final double MAX_DRIVE_SPEED = 1.5; // 3 meters per second
+  public static final double MAX_DRIVE_SPEED = 3.0; // 3 meters per second
   public static final double MAX_TURN_SPEED = Math.PI; // 1/2 rotation per second
   public static final double MAX_TURN_ACCELERATION = 2 * Math.PI; // radians per second per second
 

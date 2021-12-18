@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
@@ -60,18 +61,15 @@ public class SwerveModule
 
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
-          1.5,
-          0,
-          0,
-          new TrapezoidProfile.Constraints(
-            Constants.MAX_TURN_SPEED, Constants.MAX_TURN_ACCELERATION));
+          1.0, 0, 0, //1.5, 0, 0
+          new TrapezoidProfile.Constraints(Constants.MAX_TURN_SPEED, Constants.MAX_TURN_ACCELERATION));
 
   //FIXME: Gains are for example purposes only - must be determined for your own robot!
   //First parameter is static gain (how much voltage it takes to move)
   //Second parameters is veloctiy gain (how much additional speed you get per volt)
   
   private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.22, 2.2, 0.16);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5, 0.01);
+  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1.0, 0.5, 0.05);//1, 0.5, 0.01);
 
   /**
    * Constructs a SwerveModule.
@@ -157,21 +155,27 @@ public class SwerveModule
     final double turnOutput =
         m_turningPIDController.calculate(getTurningEncoderPosition(), state.angle.getRadians());
 
-    final double turnFeedforward =
+    final double turnFeedforward = 
         m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     //FIXME Convert to Talon FX
     var normalizedDriveVoltage = normalizeVoltage(driveOutput + driveFeedforward);
     var normalizedTurnVoltage = normalizeVoltage(turnOutput + turnFeedforward);
-    m_driveMotor.set(ControlMode.PercentOutput, normalizedDriveVoltage);
+    // m_driveMotor.set(ControlMode.PercentOutput, normalizedDriveVoltage);
     m_turningMotor.set(ControlMode.PercentOutput, normalizedTurnVoltage);
+
+
+    SmartDashboard.putNumber(m_moduleName + " Optimized Angle", state.angle.getRadians());
+    SmartDashboard.putNumber(m_moduleName + " Optimized Speed", state.speedMetersPerSecond);
+    SmartDashboard.putNumber(m_moduleName + " Normalized Drive Voltage", normalizedDriveVoltage);
+    SmartDashboard.putNumber(m_moduleName + " Normalized Turn Voltage", normalizedTurnVoltage);
   }
 
   public double getDrivingEncoderRate()
   {
     double velocity = m_driveMotor.getSelectedSensorVelocity() * Constants.DRIVE_ENCODER_RATE_TO_METERS_PER_SEC;
     // FIXME Units conversion?
-    System.out.println(m_driveMotor.getDeviceID() + " " + velocity);
+    // System.out.println(m_driveMotor.getDeviceID() + " " + velocity);
     return velocity;
   }
 
@@ -198,7 +202,6 @@ public class SwerveModule
    */
   public static double normalizeVoltage(double outputVolts)
   {
-    var normalizedVoltage = outputVolts / Constants.MAX_BATTERY_VOLTAGE; //RobotController.getBatteryVoltage();
-    return normalizedVoltage;
+    return outputVolts / Constants.MAX_BATTERY_VOLTAGE; //RobotController.getBatteryVoltage();
   }
 }
