@@ -90,10 +90,6 @@ public class Drivetrain //extends RobotDriveBase
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
-
-    printTurnEncoderPosition();
-
-    printNavX();
   }
 
   /** Updates the field relative position of the robot. */
@@ -105,6 +101,49 @@ public class Drivetrain //extends RobotDriveBase
         m_frontRight.getState(),
         m_backLeft.getState(),
         m_backRight.getState());
+  }
+
+  public void setMotorSpeeds(double driveSpeed, double turnSpeed)
+  {
+    m_frontLeft.setMotorSpeeds(driveSpeed, turnSpeed);
+    m_frontRight.setMotorSpeeds(driveSpeed, turnSpeed);
+    m_backLeft.setMotorSpeeds(driveSpeed, turnSpeed);
+    m_backRight.setMotorSpeeds(driveSpeed, turnSpeed);
+    try
+    {
+      Robot.bw.newLine();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+
+  public void resetEncoders()
+  {
+    m_frontLeft.resetEncoders();
+    m_frontRight.resetEncoders();
+    m_backLeft.resetEncoders();
+    m_backRight.resetEncoders();
+  }
+
+  public double getDriveMotorPosition()
+  {
+    return m_backRight.getDriveMotorPosition();
+  }
+
+  public double getTurnEncoderPosition()
+  {
+    return m_backRight.getTurningEncoderPosition();
+  }
+
+  public double getDriveMotorRate()
+  {
+    return m_backRight.getDrivingEncoderRate();
+  }
+  public double getTurnEncoderRate()
+  {
+    return m_backRight.getTurnEncoderRate();
   }
 
   // @Override

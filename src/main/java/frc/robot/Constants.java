@@ -38,8 +38,8 @@ public final class Constants
 
   // Drivetrain constants
   // FIXME Check the max speeds and accelerations
-  public static final double MAX_DRIVE_SPEED = 3.0; // 3 meters per second
-  public static final double MAX_TURN_SPEED = Math.PI; // 1/2 rotation per second
+  public static final double MAX_DRIVE_SPEED = 3.5; // meters per second
+  public static final double MAX_TURN_SPEED = 35; // radians per second
   public static final double MAX_TURN_ACCELERATION = 2 * Math.PI; // radians per second per second
 
   public static final int DRIVE_MOTOR_ENCODER_RESOLUTION = 2048;
@@ -48,7 +48,9 @@ public final class Constants
   public static final double TURN_MOTOR_GEAR_RATIO = 12.8;
 
   public static final double DRIVE_ENCODER_RATE_TO_METERS_PER_SEC = 
-    ((10 / DRIVE_MOTOR_ENCODER_RESOLUTION) / DRIVE_MOTOR_GEAR_RATIO) * (2 * Math.PI * WHEEL_RADIUS_METERS);
+    ((10.0 / DRIVE_MOTOR_ENCODER_RESOLUTION) / DRIVE_MOTOR_GEAR_RATIO) * (2.0 * Math.PI * WHEEL_RADIUS_METERS);
+  public static final double TURN_ENCODER_RATE_TO_RADIANS_PER_SEC = 
+    (1.0 / TURN_MOTOR_ENCODER_RESOLUTION) * (2.0 * Math.PI);
   public static final double MAX_BATTERY_VOLTAGE = 12.0;
 
   /* Correct values that have been moved to enum
@@ -83,31 +85,31 @@ public final class Constants
     String moduleName;
     int driveMotorChannel;
     boolean driveMotorInverted;
-    int turningMotorEncoder;
-    double turningMotorEncoderOffset;
-    int turningMotorChannel;
+    int turnMotorEncoder;
+    double turnMotorEncoderOffset;
+    int turnMotorChannel;
 
     /**
      * @param driveMotorChannel
      * @param driveMotorInverted
-     * @param turningMotorEncoder
-     * @param turningMotorEncoderOffset
-     * @param turningMotorChannel
+     * @param turnMotorEncoder
+     * @param turnMotorEncoderOffset
+     * @param turnMotorChannel
      */
-    private SwerveModule(  String moduleName,
-                                    int driveMotorChannel, 
-                                    boolean driveMotorInverted, 
-                                    int turningMotorEncoder, 
-                                    double turningMotorEncoderOffset, 
-                                    int turningMotorChannel)
+    private SwerveModule( String moduleName,
+                          int driveMotorChannel, 
+                          boolean driveMotorInverted, 
+                          int turnMotorEncoder, 
+                          double turnMotorEncoderOffset, 
+                          int turnMotorChannel)
     {
       this.moduleName = moduleName;
       this.driveMotorChannel = driveMotorChannel;
       this.driveMotorInverted = driveMotorInverted;
-      this.turningMotorEncoder = turningMotorEncoder;
+      this.turnMotorEncoder = turnMotorEncoder;
       // FIXME make not strange conversion
-      this.turningMotorEncoderOffset = turningMotorEncoderOffset;
-      this.turningMotorChannel = turningMotorChannel;
+      this.turnMotorEncoderOffset = turnMotorEncoderOffset;
+      this.turnMotorChannel = turnMotorChannel;
     }
 
     public static String dump()
@@ -123,9 +125,9 @@ public final class Constants
             smc.name(),
             smc.driveMotorChannel,
             smc.driveMotorInverted,
-            smc.turningMotorEncoder,
-            smc.turningMotorEncoderOffset,
-            smc.turningMotorChannel));
+            smc.turnMotorEncoder,
+            smc.turnMotorEncoderOffset,
+            smc.turnMotorChannel));
       }
       return sb.toString();
     }

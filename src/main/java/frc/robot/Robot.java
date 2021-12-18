@@ -4,9 +4,14 @@
 
 package frc.robot;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -20,16 +25,53 @@ public class Robot extends TimedRobot
   private final SlewRateLimiter m_yspeedLimiter = new SlewRateLimiter(3);
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
+  public static BufferedWriter bw;
+  public static Timer time = new Timer();
+
+  private static double volts = 0.0;
+
   @Override
   public void robotInit()
   {
+    try 
+    {
+      String filename = "/home/lvuser/characteristic.csv";
+      bw = new BufferedWriter(new FileWriter(new File(filename)));
+      System.out.println("writing data collected to roboRIO > " + filename + "<");    
+    } 
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+
+
     System.out.println(Constants.SwerveModule.dump());
   }
 
   @Override
   public void robotPeriodic()
   {
-    
+    m_swerve.printTurnEncoderPosition();
+    m_swerve.printNavX();    
+  }
+
+  @Override
+  public void disabledInit()
+  {
+    try
+    {
+      Robot.bw.flush();
+    }
+    catch (Exception e)
+    {
+      e.printStackTrace();
+    }
+  }
+
+  @Override
+  public void disabledPeriodic()
+  {
+
   }
 
   @Override
@@ -47,6 +89,10 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousInit()
   {
+    time.reset();
+    time.start();
+    m_swerve.resetEncoders();
+    volts = 0.0;
     // m_swerve.drive(3.0, 0.0, 0.0, false);
     // driveWithJoystick(false);
     // m_swerve.updateOdometry();
@@ -55,7 +101,11 @@ public class Robot extends TimedRobot
   @Override
   public void autonomousPeriodic()
   {
-    m_swerve.drive(3.0, 0.0, 0.0, false);
+    volts = 10.0;
+    // m_swerve.setMotorSpeeds(0.0, volts / Constants.MAX_BATTERY_VOLTAGE);
+    System.out.println("norm volts = " + volts + "   rate = " + m_swerve.getTurnEncoderRate());
+  
+    // m_swerve.drive(3.0, 0.0, 0.0, false);
     // driveWithJoystick(false);
     // m_swerve.updateOdometry();
   }
@@ -83,7 +133,6 @@ public class Robot extends TimedRobot
     xLeft = (Math.abs(xLeft) < 0.15) ? 0.0 : xLeft;
     xRight = (Math.abs(xRight) < 0.15) ? 0.0 : xRight;
     
-
     // Get the x speed. We are inverting this because Xbox controllers return
     // negative values when we push forward.
     double xSpeed = -m_xspeedLimiter.calculate(yLeft) * Constants.MAX_DRIVE_SPEED;
@@ -99,8 +148,10 @@ public class Robot extends TimedRobot
     // the right by default.
     double rot = -m_rotLimiter.calculate(xRight) * Constants.MAX_TURN_SPEED;
 
+    // m_swerve.setMotorSpeeds(yLeft / 2.0, xRight / 5.0);
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
     // System.out.printf("xSpeed = %f, ySpeed = %f, rot = %f\n", xSpeed, ySpeed, rot);
     // m_swerve.printNavX();
   }
+
 }
