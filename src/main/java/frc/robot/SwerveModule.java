@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpiutil.math.MathUtil;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -58,20 +59,20 @@ public class SwerveModule
   private final double m_turnEncoderOffset;
   private final String m_moduleName;
 
-  private final PIDController m_drivePIDController = new PIDController(2.0, 0, 0);
+  private final PIDController m_drivePIDController = new PIDController(3.5, 0, 0.09);
   // private final PIDController m_turningPIDController = new PIDController(1.0, 0, 0);
 
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
-          0.02, 0, 0, //1.5, 0, 0
-          new TrapezoidProfile.Constraints(Constants.MAX_TURN_SPEED, Constants.MAX_TURN_ACCELERATION));
+          4.5, 0.0, 0.05,
+          new TrapezoidProfile.Constraints(Constants.MAX_MODULE_TURN_SPEED, Constants.MAX_MODULE_TURN_ACCELERATION));
 
   //FIXME: Gains are for example purposes only - must be determined for your own robot!
   //First parameter is static gain (how much voltage it takes to move)
   //Second parameters is veloctiy gain (how much additional speed you get per volt)
   
-  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.165, 0.32, 0.0);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.2, 3.4, 0.0);//1, 0.5, 0.01);
+  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(0.165, 2.1, 0.0);
+  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0.2, 0.3, 0.0);
 
   /**
    * Constructs a SwerveModule.
@@ -82,7 +83,7 @@ public class SwerveModule
   public SwerveModule(Constants.SwerveModule smc)
   {
     m_driveMotor = new TalonFX(smc.driveMotorChannel);
-    m_turnEncoder = new CANCoder(smc.turnMotorEncoder);
+    m_turnEncoder = new CANCoder(smc.turnMotorEncoder);  
     m_turnMotor = new TalonFX(smc.turnMotorChannel);
     m_moduleName = smc.moduleName;
 
@@ -90,6 +91,7 @@ public class SwerveModule
     configTalon(m_driveMotor, smc.driveMotorInverted);
     // Do not invert any of the turning motors
     configTalon(m_turnMotor, false);
+    configCANCoder();
 
     m_turnEncoderOffset = smc.turnMotorEncoderOffset;
     m_turnEncoder.setPosition(m_turnEncoder.getAbsolutePosition());
@@ -111,6 +113,7 @@ public class SwerveModule
     m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
+  // TODO Separate for the drive motor and turn motor
   private static void configTalon(TalonFX motor, boolean inverted)
   {
     motor.configFactoryDefault();
@@ -125,6 +128,11 @@ public class SwerveModule
     motor.configNeutralDeadband(0.001);
     motor.configVoltageCompSaturation(Constants.MAX_BATTERY_VOLTAGE);
     motor.enableVoltageCompensation(true);
+  }
+
+  private void configCANCoder()
+  {
+    // TODO Add all the config settings
   }
 
   /**
@@ -148,6 +156,11 @@ public class SwerveModule
     SwerveModuleState state =
         SwerveModuleState.optimize(desiredState, new Rotation2d(getTurningEncoderPosition()));
 
+    double driveP = SmartDashboard.getNumber("Drive P", 0.0);
+    double driveD = SmartDashboard.getNumber("Drive D", 0.0);
+    m_drivePIDController.setP(driveP);
+    m_drivePIDController.setD(driveD);
+
     // Calculate the drive output from the drive PID controller.
     final double driveOutput =
         m_drivePIDController.calculate(getDrivingEncoderRate(), state.speedMetersPerSecond);
@@ -155,11 +168,15 @@ public class SwerveModule
     final double driveFeedforward = m_driveFeedforward.calculate(state.speedMetersPerSecond);
 
     // Calculate the turning motor output from the turning PID controller.
+
+    // double p = SmartDashboard.getNumber("Turn P", 0.0);
+    // double d = SmartDashboard.getNumber("Turn D", 0.0);
+    // m_turningPIDController.setP(p);
+    // m_turningPIDController.setD(d);
     final double turnOutput =
         m_turningPIDController.calculate(getTurningEncoderPosition(), state.angle.getRadians());
 
     final double turnFeedforward =
-        // m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().position);
         m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 
     //FIXME Convert to Talon FX
@@ -177,6 +194,7 @@ public class SwerveModule
     SmartDashboard.putNumber(m_moduleName + " Drive Output", driveOutput);
     SmartDashboard.putNumber(m_moduleName + " Drive Feedforward", driveFeedforward);
     SmartDashboard.putNumber(m_moduleName + " Normalized Drive Percent", normalizedDriveVoltage);
+    SmartDashboard.putNumber(m_moduleName + " Drive Encoder Rate", getDrivingEncoderRate());
   }
 
   public double getDrivingEncoderRate()
@@ -190,7 +208,7 @@ public class SwerveModule
   public double getTurningEncoderPosition()
   {
     // Used the Phoenix tuner to change the return value to radians
-    return m_turnEncoder.getPosition(); 
+    return m_turnEncoder.getAbsolutePosition(); 
     // Reset facory default in Phoenix Tuner to make the 0 go forward 
     // while wheel bolts facing in, then save, then get absolute value and put in enum
     // return m_turningEncoder.getAbsolutePosition() - m_turningEncoderOffset; 
@@ -210,14 +228,14 @@ public class SwerveModule
    */
   public static double normalizeVoltage(double outputVolts)
   {
-    return outputVolts / Constants.MAX_BATTERY_VOLTAGE; //RobotController.getBatteryVoltage();
+    return MathUtil.clamp(outputVolts / Constants.MAX_BATTERY_VOLTAGE, -1.0, 1.0); //RobotController.getBatteryVoltage();
   }
 
   public void resetEncoders()
   {
     m_driveMotor.setSelectedSensorPosition(0.0);
     m_turnMotor.setSelectedSensorPosition(0.0);
-    m_turnEncoder.setPosition(0.0);
+    m_turnEncoder.setPosition(m_turnEncoder.getAbsolutePosition());
   }
 
   public void setMotorSpeeds(double driveSpeed, double turnSpeed)

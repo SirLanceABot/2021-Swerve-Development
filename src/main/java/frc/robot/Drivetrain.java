@@ -10,6 +10,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.wpilibj.MotorSafety;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveKinematics;
@@ -85,7 +86,14 @@ public class Drivetrain //extends RobotDriveBase
 
     SwerveDriveKinematics.normalizeWheelSpeeds(swerveModuleStates, Constants.MAX_DRIVE_SPEED);
     printDesiredStates(swerveModuleStates);
-    
+
+    // double ang = SmartDashboard.getNumber("Turn angle", 0.0);
+    // for(int i = 0; i < swerveModuleStates.length; i++)
+    // {
+    //   swerveModuleStates[i].speedMetersPerSecond = 0.0;
+    //   swerveModuleStates[i].angle = new Rotation2d(Math.toRadians(ang));
+    // }
+
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);

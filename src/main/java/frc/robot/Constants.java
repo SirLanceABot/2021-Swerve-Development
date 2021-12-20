@@ -38,9 +38,10 @@ public final class Constants
 
   // Drivetrain constants
   // FIXME Check the max speeds and accelerations
-  public static final double MAX_DRIVE_SPEED = 3.5; // meters per second
-  public static final double MAX_TURN_SPEED = 35; // radians per second
-  public static final double MAX_TURN_ACCELERATION = 2 * Math.PI; // radians per second per second
+  public static final double MAX_DRIVE_SPEED = 4.4; // meters per second
+  public static final double MAX_MODULE_TURN_SPEED = 35.0; // radians per second
+  public static final double MAX_ROBOT_TURN_SPEED = 18.0; // FIXME radians per second 
+  public static final double MAX_MODULE_TURN_ACCELERATION = 300.0; // radians per second per second
 
   public static final int DRIVE_MOTOR_ENCODER_RESOLUTION = 2048;
   public static final int TURN_MOTOR_ENCODER_RESOLUTION = 4096;
@@ -51,6 +52,7 @@ public final class Constants
     ((10.0 / DRIVE_MOTOR_ENCODER_RESOLUTION) / DRIVE_MOTOR_GEAR_RATIO) * (2.0 * Math.PI * WHEEL_RADIUS_METERS);
   public static final double TURN_ENCODER_RATE_TO_RADIANS_PER_SEC = 
     (1.0 / TURN_MOTOR_ENCODER_RESOLUTION) * (2.0 * Math.PI);
+
   public static final double MAX_BATTERY_VOLTAGE = 12.0;
 
   /* Correct values that have been moved to enum
