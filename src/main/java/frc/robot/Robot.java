@@ -132,6 +132,9 @@ public class Robot extends TimedRobot
 
   private void driveWithJoystick(boolean fieldRelative)
   {
+    double powerLimit = 0.6;
+    double leftTriggerPull = 0.0;
+
     double yLeft = -m_controller.getY(GenericHID.Hand.kLeft);
     double xLeft = -m_controller.getX(GenericHID.Hand.kLeft);
     double xRight = -m_controller.getX(GenericHID.Hand.kRight);
@@ -157,6 +160,18 @@ public class Robot extends TimedRobot
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
     double rot = m_rotLimiter.calculate(xRight) * Constants.MAX_ROBOT_TURN_SPEED;
+
+    // Scales down the input power
+    if (m_controller.getBumper(GenericHID.Hand.kLeft))
+    {
+      powerLimit = 1.0;
+    }
+
+    powerLimit += m_controller.getTriggerAxis(GenericHID.Hand.kLeft) * (1.0 - powerLimit);
+
+    xSpeed *= powerLimit;
+    ySpeed *= powerLimit;
+    rot *= powerLimit;
 
     // m_swerve.setMotorSpeeds(yLeft / 2.0, xRight / 5.0);
     m_swerve.drive(xSpeed, ySpeed, rot, fieldRelative);
