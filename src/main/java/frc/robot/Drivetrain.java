@@ -48,6 +48,8 @@ public class Drivetrain //extends RobotDriveBase
   private final SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(m_kinematics, m_navx.getRotation2d());
 
+  private SwerveModuleState[] previousSwerveModuleStates = null;
+
   public Drivetrain()
   {
     m_navx.reset();
@@ -94,10 +96,19 @@ public class Drivetrain //extends RobotDriveBase
     //   swerveModuleStates[i].angle = new Rotation2d(Math.toRadians(ang));
     // }
 
+    if(xSpeed == 0 && ySpeed == 0 && rot == 0 && previousSwerveModuleStates != null)
+    {
+      for(int i = 0; i < swerveModuleStates.length; i++)
+      {
+        swerveModuleStates[i].angle = previousSwerveModuleStates[i].angle;
+      }
+    }
     m_frontLeft.setDesiredState(swerveModuleStates[0]);
     m_frontRight.setDesiredState(swerveModuleStates[1]);
     m_backLeft.setDesiredState(swerveModuleStates[2]);
     m_backRight.setDesiredState(swerveModuleStates[3]);
+
+    previousSwerveModuleStates = swerveModuleStates;
   }
 
   /** Updates the field relative position of the robot. */
