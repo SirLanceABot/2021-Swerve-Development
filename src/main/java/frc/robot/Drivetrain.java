@@ -160,10 +160,11 @@ public class Drivetrain //extends RobotDriveBase
   {
     return m_backRight.getDrivingEncoderRate();
   }
-  public double getTurnEncoderRate()
-  {
-    return m_backRight.getTurnEncoderRate();
-  }
+  // FIXME Changing radians to degrees, commented out to make sure it breaks or doesn't
+  // public double getTurnEncoderRate()
+  // {
+  //   return m_backRight.getTurnEncoderRate();
+  // }
 
   // @Override
   // public void stopMotor()

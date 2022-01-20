@@ -7,7 +7,14 @@ package frc.robot;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.Encoder;
+
+import com.ctre.phoenix.sensors.AbsoluteSensorRange;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.ctre.phoenix.sensors.SensorTimeBase;
+import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
+
 import edu.wpi.first.wpilibj.PWMSparkMax;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SpeedController;
@@ -111,7 +118,7 @@ public class SwerveModule
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
-    // FIXME Changed 
+    // FIXME Changed the PI to 180
     m_turningPIDController.enableContinuousInput(-180, 180);
   }
 
@@ -135,6 +142,54 @@ public class SwerveModule
   private void configCANCoder()
   {
     // TODO Add all the config settings
+    /**
+       * Confgure the CANCoders
+       */
+    /**
+      CANCoderConfiguration CANCoderConfigs = new CANCoderConfiguration();
+
+      // Configurations all have in common
+      CANCoderConfigs.velocityMeasurementPeriod = SensorVelocityMeasPeriod.Period_100Ms;
+      CANCoderConfigs.velocityMeasurementWindow = 64;
+      CANCoderConfigs.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
+      CANCoderConfigs.sensorDirection = false; // CCW
+      CANCoderConfigs.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition; // error on get "On boot up, set position to zero.";
+      // CANCoderConfigs.sensorCoefficient = 0.0015339776873588562; // 4096 ticks to radians
+      CANCoderConfigs.sensorCoefficient = 0.087890625; // 4096 ticks to degrees
+      CANCoderConfigs.unitString = "degrees";
+      CANCoderConfigs.sensorTimeBase = SensorTimeBase.PerSecond;
+      CANCoderConfigs.customParam0 = 0;
+      CANCoderConfigs.customParam1 = 0;
+
+      // Individual Settings
+      System.out.println("frontLeftEncoder");
+      frontLeftEncoder = new CANCoder(Constants.SwerveModule.frontLeft.turningMotorEncoder);
+      System.out.println("setStatusFramePeriod " + frontLeftEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));
+      CANCoderConfigs.magnetOffsetDegrees = -167.255859375;
+      System.out.println("configAllSettings " + frontLeftEncoder.configAllSettings(CANCoderConfigs));
+      System.out.println(CANCoderConfigs.toString());
+
+      System.out.println("backLeftEncoder");
+      backLeftEncoder = new CANCoder(Constants.SwerveModule.backLeft.turningMotorEncoder);
+      System.out.println("setStatusFramePeriod " + backLeftEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));
+      CANCoderConfigs.magnetOffsetDegrees = -348.75;
+      System.out.println("configAllSettings " + backLeftEncoder.configAllSettings(CANCoderConfigs));
+      System.out.println(CANCoderConfigs.toString());
+
+      System.out.println("frontRightEncoder");
+      frontRightEncoder = new CANCoder(Constants.SwerveModule.frontRight.turningMotorEncoder);
+      System.out.println("setStatusFramePeriod " + frontRightEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));
+      CANCoderConfigs.magnetOffsetDegrees = -305.947265625;
+      System.out.println("configAllSettings " + frontRightEncoder.configAllSettings(CANCoderConfigs));
+      System.out.println(CANCoderConfigs.toString());
+
+      System.out.println("backRightEncoder");
+      backRightEncoder = new CANCoder(Constants.SwerveModule.backRight.turningMotorEncoder);
+      System.out.println("setStatusFramePeriod " + backRightEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));    
+      CANCoderConfigs.magnetOffsetDegrees = -101.953125;
+      System.out.println("configAllSettings " + backRightEncoder.configAllSettings(CANCoderConfigs));
+      System.out.println(CANCoderConfigs.toString());
+       */
   }
 
   /**
@@ -144,7 +199,9 @@ public class SwerveModule
    */
   public SwerveModuleState getState()
   {
-    return new SwerveModuleState(getDrivingEncoderRate(), new Rotation2d(getTurningEncoderPosition()));
+    // FIXME Changing radians to degrees
+    return new SwerveModuleState(getDrivingEncoderRate(), Rotation2d.fromDegrees(getTurningEncoderPosition()));
+    // return new SwerveModuleState(getDrivingEncoderRate(), new Rotation2d(getTurningEncoderPosition())); // Using radian line
   }
 
   /**
@@ -155,8 +212,12 @@ public class SwerveModule
   public void setDesiredState(SwerveModuleState desiredState)
   {
     // Optimize the reference state to avoid spinning further than 90 degrees
+    // FIXME Changing radians to degrees
     SwerveModuleState state =
-        SwerveModuleState.optimize(desiredState, new Rotation2d(getTurningEncoderPosition()));
+        SwerveModuleState.optimize(desiredState, Rotation2d.fromDegrees(getTurningEncoderPosition()));
+        
+    // SwerveModuleState state =
+    // SwerveModuleState.optimize(desiredState, new Rotation2d(getTurningEncoderPosition()));
 
     double driveP = SmartDashboard.getNumber("Drive P", 0.0);
     double driveD = SmartDashboard.getNumber("Drive D", 0.0);
@@ -175,8 +236,9 @@ public class SwerveModule
     // double d = SmartDashboard.getNumber("Turn D", 0.0);
     // m_turningPIDController.setP(p);
     // m_turningPIDController.setD(d);
+    // FIXME Changing radians to degrees, but left PID with radian values until later time
     final double turnOutput =
-        m_turningPIDController.calculate(getTurningEncoderPosition(), state.angle.getRadians());
+        m_turningPIDController.calculate(Math.toRadians(getTurningEncoderPosition()), state.angle.getRadians());
 
     final double turnFeedforward =
         m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
@@ -188,7 +250,9 @@ public class SwerveModule
     m_turnMotor.set(ControlMode.PercentOutput, normalizedTurnVoltage);
 
 
-    SmartDashboard.putNumber(m_moduleName + " Optimized Angle", state.angle.getRadians());
+    // FIXME Changing radians to degrees
+    SmartDashboard.putNumber(m_moduleName + " Optimized Angle Radians", state.angle.getRadians());
+    SmartDashboard.putNumber(m_moduleName + " Optimized Angle Degrees", state.angle.getDegrees());
     SmartDashboard.putNumber(m_moduleName + " Optimized Speed", state.speedMetersPerSecond);
     SmartDashboard.putNumber(m_moduleName + " Turn Output", turnOutput);
     SmartDashboard.putNumber(m_moduleName + " Turn Feedforward", turnFeedforward);
@@ -209,6 +273,7 @@ public class SwerveModule
 
   public double getTurningEncoderPosition()
   {
+    // FIXME Changing radians to degrees included making encoder return degrees
     // Used the Phoenix tuner to change the return value to radians
     return m_turnEncoder.getAbsolutePosition(); 
     // Reset facory default in Phoenix Tuner to make the 0 go forward 
@@ -264,8 +329,9 @@ public class SwerveModule
     return m_driveMotor.getSelectedSensorPosition();
   }
 
-  public double getTurnEncoderRate()
-  {
-    return m_turnEncoder.getVelocity();
-  }
+  // FIXME Changing radians to degrees, commented out to make sure it breaks or doesn't
+  // public double getTurnEncoderRate()
+  // {
+  //   return m_turnEncoder.getVelocity();
+  // }
 }

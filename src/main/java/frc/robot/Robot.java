@@ -159,6 +159,7 @@ public class Robot extends TimedRobot
     // positive value when we pull to the left (remember, CCW is positive in
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
+    // FIXME Changing radians to degrees, change the constant in order to work
     double rot = m_rotLimiter.calculate(xRight) * Constants.MAX_ROBOT_TURN_SPEED;
 
     // Scales down the input power
