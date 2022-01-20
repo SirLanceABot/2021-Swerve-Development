@@ -64,7 +64,7 @@ public class SwerveModule
 
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
-          4.5, 0.0, 0.05,
+          4.5, 0.0, 0.05, //4.5, 0.0, 0.05,
           new TrapezoidProfile.Constraints(Constants.MAX_MODULE_TURN_SPEED, Constants.MAX_MODULE_TURN_ACCELERATION));
 
   //FIXME: Gains are for example purposes only - must be determined for your own robot!
@@ -94,6 +94,7 @@ public class SwerveModule
     configCANCoder();
 
     m_turnEncoderOffset = smc.turnMotorEncoderOffset;
+    // When deploy code set the integrated encoder to the absolute encoder on the CANCoder
     m_turnEncoder.setPosition(m_turnEncoder.getAbsolutePosition());
 
     // resetTurningMotorEncoder();
@@ -110,7 +111,8 @@ public class SwerveModule
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
-    m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    // FIXME Changed 
+    m_turningPIDController.enableContinuousInput(-180, 180);
   }
 
   // TODO Separate for the drive motor and turn motor
@@ -266,5 +268,4 @@ public class SwerveModule
   {
     return m_turnEncoder.getVelocity();
   }
-
 }
