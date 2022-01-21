@@ -63,15 +63,17 @@ public class SwerveModule
   // private Encoder m_driveEncoder;
   private final CANCoder m_turnEncoder; //= new CANCoder();
 
-  private final double m_turnEncoderOffset;
   private final String m_moduleName;
+  private final double m_turnEncoderOffset;
 
   private final PIDController m_drivePIDController = new PIDController(3.5, 0, 0.09);
   // private final PIDController m_turningPIDController = new PIDController(1.0, 0, 0);
 
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
-          4.5, 0.0, 0.05, //4.5, 0.0, 0.05,
+          0.0789, 0.0, 0.000877,
+          // FIXME Changing radians to degrees, divided by 57 roughly
+          // 4.5, 0.0, 0.05, //4.5, 0.0, 0.05,
           new TrapezoidProfile.Constraints(Constants.MAX_MODULE_TURN_SPEED, Constants.MAX_MODULE_TURN_ACCELERATION));
 
   //FIXME: Gains are for example purposes only - must be determined for your own robot!
@@ -93,6 +95,7 @@ public class SwerveModule
     m_turnEncoder = new CANCoder(smc.turnMotorEncoder);  
     m_turnMotor = new TalonFX(smc.turnMotorChannel);
     m_moduleName = smc.moduleName;
+    m_turnEncoderOffset = smc.turnMotorEncoderOffset;
 
     m_driveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 20);
     configTalon(m_driveMotor, smc.driveMotorInverted);
@@ -100,7 +103,6 @@ public class SwerveModule
     configTalon(m_turnMotor, false);
     configCANCoder();
 
-    m_turnEncoderOffset = smc.turnMotorEncoderOffset;
     // When deploy code set the integrated encoder to the absolute encoder on the CANCoder
     m_turnEncoder.setPosition(m_turnEncoder.getAbsolutePosition());
 
@@ -118,7 +120,7 @@ public class SwerveModule
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
-    // FIXME Changed the PI to 180
+    // FIXME Changing radians to degrees, replaced PI with 180
     m_turningPIDController.enableContinuousInput(-180, 180);
   }
 
@@ -145,7 +147,6 @@ public class SwerveModule
     /**
        * Confgure the CANCoders
        */
-    /**
       CANCoderConfiguration CANCoderConfigs = new CANCoderConfiguration();
 
       // Configurations all have in common
@@ -162,22 +163,23 @@ public class SwerveModule
       CANCoderConfigs.customParam1 = 0;
 
       // Individual Settings
-      System.out.println("frontLeftEncoder");
-      frontLeftEncoder = new CANCoder(Constants.SwerveModule.frontLeft.turningMotorEncoder);
-      System.out.println("setStatusFramePeriod " + frontLeftEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));
-      CANCoderConfigs.magnetOffsetDegrees = -167.255859375;
-      System.out.println("configAllSettings " + frontLeftEncoder.configAllSettings(CANCoderConfigs));
+      System.out.println(m_moduleName);
+      // frontLeftEncoder = new CANCoder(Constants.SwerveModule.frontLeft.turnMotorEncoder);
+      // System.out.println("setStatusFramePeriod " + m_turnEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));
+      CANCoderConfigs.magnetOffsetDegrees = m_turnEncoderOffset;
+      System.out.println("configAllSettings " + m_turnEncoder.configAllSettings(CANCoderConfigs));
       System.out.println(CANCoderConfigs.toString());
 
+      /*
       System.out.println("backLeftEncoder");
-      backLeftEncoder = new CANCoder(Constants.SwerveModule.backLeft.turningMotorEncoder);
+      backLeftEncoder = new CANCoder(Constants.SwerveModule.backLeft.turnMotorEncoder);
       System.out.println("setStatusFramePeriod " + backLeftEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));
       CANCoderConfigs.magnetOffsetDegrees = -348.75;
       System.out.println("configAllSettings " + backLeftEncoder.configAllSettings(CANCoderConfigs));
       System.out.println(CANCoderConfigs.toString());
 
       System.out.println("frontRightEncoder");
-      frontRightEncoder = new CANCoder(Constants.SwerveModule.frontRight.turningMotorEncoder);
+      frontRightEncoder = new CANCoder(Constants.SwerveModule.frontRight.turnMotorEncoder);
       System.out.println("setStatusFramePeriod " + frontRightEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, (int)(steerAdjustPeriod*1000.*.8)));
       CANCoderConfigs.magnetOffsetDegrees = -305.947265625;
       System.out.println("configAllSettings " + frontRightEncoder.configAllSettings(CANCoderConfigs));
@@ -189,7 +191,7 @@ public class SwerveModule
       CANCoderConfigs.magnetOffsetDegrees = -101.953125;
       System.out.println("configAllSettings " + backRightEncoder.configAllSettings(CANCoderConfigs));
       System.out.println(CANCoderConfigs.toString());
-       */
+      */
   }
 
   /**
@@ -236,10 +238,13 @@ public class SwerveModule
     // double d = SmartDashboard.getNumber("Turn D", 0.0);
     // m_turningPIDController.setP(p);
     // m_turningPIDController.setD(d);
-    // FIXME Changing radians to degrees, but left PID with radian values until later time
-    final double turnOutput =
-        m_turningPIDController.calculate(Math.toRadians(getTurningEncoderPosition()), state.angle.getRadians());
+    // FIXME Changing radians to degrees, changed PID to take degrees
+    final double turnOutput = m_turningPIDController.calculate(getTurningEncoderPosition(), state.angle.getDegrees());
 
+    // final double turnOutput =
+        // m_turningPIDController.calculate(Math.toRadians(getTurningEncoderPosition()), state.angle.getRadians());
+
+    // FIXME Changing radians to degrees, need to change this probably as it turns way to fast?
     final double turnFeedforward =
         m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
 

@@ -39,9 +39,13 @@ public final class Constants
   // Drivetrain constants
   // FIXME Check the max speeds and accelerations
   public static final double MAX_DRIVE_SPEED = 4.4; // meters per second
-  public static final double MAX_MODULE_TURN_SPEED = 35.0; // radians per second
-  public static final double MAX_ROBOT_TURN_SPEED = 18.0; // FIXME radians per second 
-  public static final double MAX_MODULE_TURN_ACCELERATION = 300.0; // radians per second per second
+  public static final double MAX_MODULE_TURN_SPEED = 1980.0; // degrees per second, this is 5.5 rev/sec
+  public static final double MAX_ROBOT_TURN_SPEED = 1080.0; // FIXME to more accurate degrees per second, this is 3 rev/sec
+  public static final double MAX_MODULE_TURN_ACCELERATION = 17280.0; // degrees per second per second, this is 48 rev/sec^2
+  // FIXME Changing radians to degrees, same measurements but in radians
+  // public static final double MAX_MODULE_TURN_SPEED = 35.0; // radians per second
+  // public static final double MAX_ROBOT_TURN_SPEED = 18.0; // FIXME radians per second
+  // public static final double MAX_MODULE_TURN_ACCELERATION = 300.0; // radians per second per second
 
   public static final int DRIVE_MOTOR_ENCODER_RESOLUTION = 2048;
   public static final int TURN_MOTOR_ENCODER_RESOLUTION = 4096;
@@ -79,10 +83,10 @@ public final class Constants
   
   static enum SwerveModule
   {
-    frontLeft("Front Left", 7, true, 8, 167.871, 9){},
-    frontRight("Front Right", 10, false, 11, 304.717, 12){},
-    backLeft("Back Left", 4, true, 5, 349.365, 6){},
-    backRight("Back Right", 1, false, 2, 103.359, 3){};
+    frontLeft("Front Left", 7, true, 8, -167.255859375, 9){},
+    frontRight("Front Right", 10, false, 11, -305.947265625, 12){},
+    backLeft("Back Left", 4, true, 5, -348.75, 6){},
+    backRight("Back Right", 1, false, 2, -101.953125, 3){};
 
     String moduleName;
     int driveMotorChannel;
